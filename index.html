@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Simplí Solutions — Pipeline Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sf-navy:#032D60;--sf-blue:#0176D3;--sf-blue-dark:#014486;--sf-blue-light:#EAF4FF;--sf-blue-border:#A8D1F0;
+  --bg:#F3F6FB;--surface:#FFFFFF;--border:#D8DCE3;--border2:#B0B8C4;
+  --fg:#181818;--fg2:#444444;--fg3:#706E6B;
+  --green:#2E844A;--green-bg:#EEF6F0;--green-border:#91D5A8;
+  --amber:#DD7A01;--amber-bg:#FEF5E7;--amber-border:#F5C67F;
+  --red:#BA0517;--red-bg:#FDEDEE;--red-border:#F5AAAC;
+  --purple:#6B3FA0;--purple-bg:#F3EEF8;--purple-border:#C9A8E8;
+  --r:4px;--r-lg:6px;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--fg);font-size:13px;line-height:1.4}
+.hidden{display:none !important}
+.topbar{height:48px;background:var(--sf-navy);display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-mark{width:30px;height:30px;border-radius:var(--r);background:var(--sf-blue);display:flex;align-items:center;justify-content:center}
+.logo-text{font-size:14px;font-weight:600;color:#fff;letter-spacing:-0.01em}
+.search-wrap{flex:1;max-width:380px;margin:0 20px;position:relative}
+.search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.45);font-size:14px;pointer-events:none}
+.search-box{width:100%;height:30px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:var(--r);padding:0 10px 0 30px;font-size:12px;color:#fff;outline:none;font-family:'Inter',sans-serif}
+.search-box::placeholder{color:rgba(255,255,255,0.45)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.client-chip{font-size:11px;color:rgba(255,255,255,0.6);background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:3px 10px}
+.top-icon{background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.55);padding:4px;line-height:1;position:relative}
+.notif-dot{position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:#FF6B6B;border:1.5px solid var(--sf-navy)}
+.top-av{width:28px;height:28px;border-radius:50%;background:var(--sf-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid rgba(255,255,255,0.3)}
+.subnav{height:36px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;position:sticky;top:48px;z-index:90;overflow-x:auto}
+.sn-item{display:inline-flex;align-items:center;gap:5px;padding:0 12px;height:36px;font-size:12px;font-weight:500;color:var(--fg3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;text-decoration:none;transition:all 0.12s;flex-shrink:0}
+.sn-item:hover{color:var(--sf-blue);background:var(--sf-blue-light)}
+.sn-item.active{color:var(--sf-blue);border-bottom-color:var(--sf-blue);font-weight:600}
+.sn-item i{font-size:14px}
+.sn-badge{background:var(--red);color:#fff;border-radius:10px;padding:1px 5px;font-size:10px;font-weight:700}
+.sn-right{margin-left:auto;display:flex;align-items:center;gap:7px;flex-shrink:0}
+.sf-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--fg2);font-family:'Inter',sans-serif;transition:all 0.12s;white-space:nowrap}
+.sf-btn:hover{background:var(--bg);border-color:var(--sf-blue);color:var(--sf-blue)}
+.sf-btn-p{background:var(--sf-blue);color:#fff;border-color:var(--sf-blue)}
+.sf-btn-p:hover{background:var(--sf-blue-dark);color:#fff}
+.sf-btn.active-filter{background:var(--sf-blue);color:#fff;border-color:var(--sf-blue)}
+.layout{display:grid;grid-template-columns:210px 1fr;min-height:calc(100vh - 84px)}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:84px;height:calc(100vh - 84px);overflow-y:auto}
+.sb-hd{padding:11px 14px 7px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--fg3);text-transform:uppercase;letter-spacing:0.1em;background:var(--bg)}
+.nav-lbl{font-size:10px;font-weight:700;color:var(--fg3);letter-spacing:0.1em;text-transform:uppercase;padding:11px 14px 4px}
+.nav-item{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;font-size:12px;color:var(--fg2);cursor:pointer;transition:all 0.1s;text-decoration:none;border-left:3px solid transparent}
+.nav-item:hover{background:var(--sf-blue-light);color:var(--sf-blue)}
+.nav-item.active{background:var(--sf-blue-light);color:var(--sf-blue);border-left-color:var(--sf-blue);font-weight:600}
+.nav-l{display:flex;align-items:center;gap:8px}
+.nav-item i{font-size:15px}
+.nav-ct{font-size:10px;font-weight:600;color:var(--fg3);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1px 6px}
+.nav-ct.r{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+.ow-row{display:flex;align-items:center;gap:8px;padding:5px 14px;cursor:pointer;transition:background 0.1s}
+.ow-row:hover{background:var(--bg)}
+.ow-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.ow-name{font-size:12px;color:var(--fg2);flex:1}
+.ow-n{font-size:11px;color:var(--fg3)}
+.sb-foot{margin-top:auto;padding:12px;border-top:1px solid var(--border)}
+.plan-pill{background:var(--sf-blue);border-radius:var(--r);padding:10px 12px}
+.pp-lbl{font-size:10px;font-weight:600;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px}
+.pp-name{font-size:13px;font-weight:700;color:#fff}
+.pp-price{font-size:11px;color:rgba(255,255,255,0.7);margin-top:1px}
+.main{padding:0;overflow-x:hidden}
+.kpi-bar{background:var(--surface);border-bottom:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr)}
+.kpi{padding:13px 16px;border-right:1px solid var(--border);position:relative;overflow:hidden}
+.kpi:last-child{border-right:none}
+.kpi-accent{position:absolute;left:0;top:0;bottom:0;width:3px}
+.kpi-lbl{font-size:10px;font-weight:700;color:var(--fg3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.kpi-val{font-size:22px;font-weight:700;color:var(--fg);letter-spacing:-0.03em;line-height:1}
+.kpi-d{font-size:11px;margin-top:4px;display:flex;align-items:center;gap:3px;font-weight:500}
+.up{color:var(--green)}.down{color:var(--red)}.neu{color:var(--fg3);font-weight:400}
+.content{padding:16px}
+.view{display:none}.view.active{display:block}
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.tb-l{display:flex;align-items:center;gap:8px}
+.pg-title{font-size:16px;font-weight:700;color:var(--fg);letter-spacing:-0.01em}
+.rec-ct{font-size:12px;color:var(--fg3);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:2px 8px;font-weight:500}
+.vt{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.vt-b{padding:4px 9px;font-size:12px;cursor:pointer;background:var(--surface);border:none;color:var(--fg3);font-family:'Inter',sans-serif;transition:all 0.1s}
+.vt-b.active{background:var(--sf-blue);color:#fff}
+.board-wrap{overflow-x:auto;padding-bottom:4px}
+.board{display:grid;grid-template-columns:repeat(5,minmax(185px,1fr));gap:8px;min-width:925px}
+.col{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.col-hd{padding:9px 11px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between}
+.col-t{font-size:11px;font-weight:700;color:var(--fg2);text-transform:uppercase;letter-spacing:0.05em}
+.col-m{display:flex;align-items:center;gap:5px}
+.col-c{font-size:11px;font-weight:600;color:var(--fg3);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1px 6px}
+.col-v{font-size:11px;font-weight:700;color:var(--sf-blue)}
+.col-body{padding:7px;min-height:340px;max-height:640px;overflow-y:auto;transition:background 0.12s}
+.col-body.drag-over{background:var(--sf-blue-light)}
+.deal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:5px;cursor:pointer;transition:all 0.12s;position:relative;overflow:hidden}
+.deal::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.deal.n::before{background:var(--border)}
+.deal.h::before{background:var(--green)}
+.deal.r::before{background:var(--red)}
+.deal.l::before{background:var(--purple)}
+.deal.w::before{background:var(--amber)}
+.deal:hover{border-color:var(--sf-blue);box-shadow:0 2px 8px rgba(1,118,211,0.12);transform:translateY(-1px)}
+.deal.dragging{opacity:0.4}
+.dc{font-size:10px;color:var(--fg3);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
+.dn{font-size:12px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px}
+.dv{font-size:15px;font-weight:700;color:var(--fg);letter-spacing:-0.02em}
+.df{display:flex;align-items:center;justify-content:space-between;margin-top:7px;padding-top:7px;border-top:1px solid var(--border)}
+.da{font-size:10px;color:var(--fg3);display:flex;align-items:center;gap:3px}
+.da.o{color:var(--red);font-weight:600}.da.g{color:var(--green);font-weight:600}
+.ob{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0}
+.mp{background:var(--surface);border:1px dashed var(--border2);border-radius:var(--r);padding:7px;text-align:center;font-size:11px;color:var(--fg3);font-weight:500;cursor:pointer;margin-top:2px;transition:all 0.12s}
+.mp:hover{border-color:var(--sf-blue);color:var(--sf-blue);background:var(--sf-blue-light)}
+.sf-tbl{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.sf-tbl th{padding:8px 11px;font-size:10px;font-weight:700;color:var(--fg3);text-transform:uppercase;letter-spacing:0.06em;background:var(--bg);border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+.sf-tbl td{padding:9px 11px;font-size:12px;color:var(--fg2);border-bottom:1px solid var(--border);vertical-align:middle}
+.sf-tbl tr:last-child td{border-bottom:none}
+.sf-tbl tr:hover td{background:var(--sf-blue-light)}
+.tc{width:16px;height:16px;border-radius:3px;border:1.5px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.12s}
+.tc:hover{border-color:var(--sf-blue);background:var(--sf-blue-light)}
+.tc.done{background:var(--green);border-color:var(--green)}
+.pb{font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:0.04em}
+.pc{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.ph{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.pn{background:var(--sf-blue-light);color:var(--sf-blue);border:1px solid var(--sf-blue-border)}
+.db{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px}
+.do{background:var(--red-bg);color:var(--red)}.dt{background:var(--amber-bg);color:var(--amber)}.ds{background:var(--sf-blue-light);color:var(--sf-blue)}
+.sdiv{padding:5px 11px;background:var(--bg);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--fg3);text-transform:uppercase;letter-spacing:0.08em;display:flex;align-items:center;gap:7px}
+.sdot{width:7px;height:7px;border-radius:50%}
+.cl{display:grid;grid-template-columns:250px 1fr;gap:12px}
+.dlp{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;max-height:560px;overflow-y:auto}
+.dlp-hd{padding:9px 12px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--fg3);text-transform:uppercase;letter-spacing:0.08em;background:var(--bg);position:sticky;top:0}
+.dli{padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;border-left:3px solid transparent}
+.dli:last-child{border-bottom:none}
+.dli:hover{background:var(--sf-blue-light)}
+.dli.active{background:var(--sf-blue-light);border-left-color:var(--sf-blue)}
+.dli-n{font-size:12px;font-weight:600;color:var(--fg);margin-bottom:2px}
+.dli-m{font-size:11px;color:var(--fg3)}
+.dli-v{font-size:12px;font-weight:700;color:var(--sf-blue)}
+.ap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);display:flex;flex-direction:column}
+.ap-hd{padding:12px 15px;border-bottom:1px solid var(--border);background:var(--bg)}
+.ap-n{font-size:14px;font-weight:700;color:var(--fg);margin-bottom:4px}
+.ap-m{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ap-s{font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:0.04em}
+.ap-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:0;max-height:380px}
+.ai{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--border)}
+.ai:last-child{border-bottom:none}
+.aav{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.acon{flex:1;min-width:0}
+.atop{display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap}
+.aauth{font-size:12px;font-weight:700;color:var(--fg)}
+.atime{font-size:11px;color:var(--fg3)}
+.atype{font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:0.04em}
+.ac{background:#DBEAFE;color:#1D4ED8}.ae{background:#D1FAE5;color:#065F46}.an{background:#FEF3C7;color:#92400E}.as{background:var(--bg);color:var(--fg3);border:1px solid var(--border)}
+.atext{font-size:12px;color:var(--fg2);line-height:1.55;white-space:pre-wrap}
+.ap-in{border-top:1px solid var(--border);padding:11px 15px}
+.tr{display:flex;gap:5px;margin-bottom:7px}
+.tb2{font-size:11px;font-weight:600;padding:4px 9px;border-radius:3px;border:1px solid var(--border2);background:var(--bg);color:var(--fg3);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.1s}
+.tb2.active{background:var(--sf-blue);color:#fff;border-color:var(--sf-blue)}
+.ir{display:flex;gap:7px}
+.sfi{flex:1;padding:6px 9px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);font-size:12px;color:var(--fg);outline:none;font-family:'Inter',sans-serif;transition:border-color 0.12s}
+.sfi:focus{border-color:var(--sf-blue);box-shadow:0 0 0 2px rgba(1,118,211,0.15)}
+textarea.sfi{resize:vertical;min-height:60px;font-family:inherit}
+.fcg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.fcc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:13px;overflow:hidden}
+.fcc.full{grid-column:1/-1}
+.fct{font-size:10px;font-weight:700;color:var(--fg3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:11px;display:flex;align-items:center;gap:5px}
+.fct i{font-size:13px;color:var(--sf-blue)}
+.mt{width:100%;border-collapse:collapse}
+.mt th{font-size:10px;font-weight:700;color:var(--fg3);text-transform:uppercase;letter-spacing:0.06em;padding:3px 7px;text-align:left;border-bottom:1px solid var(--border)}
+.mt td{padding:6px 7px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.mt tr:last-child td{border-bottom:none}
+.mn{font-weight:600;color:var(--fg)}
+.bt{width:130px}
+.btr{height:15px;background:var(--bg);border-radius:3px;overflow:hidden;border:1px solid var(--border)}
+.bf{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(0.16,1,0.3,1)}
+.bh{background:linear-gradient(90deg,var(--green),#4CAF81)}
+.bm{background:linear-gradient(90deg,var(--sf-blue),#4DA8E8)}
+.bl{background:linear-gradient(90deg,var(--amber),#F0A84A)}
+.amt{font-weight:700;color:var(--fg);text-align:right}
+.prb{font-size:11px;font-weight:600;text-align:right}
+.sr{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.sr:last-child{border-bottom:none}
+.sn2{font-size:12px;font-weight:600;color:var(--fg);flex:1}
+.sc{font-size:11px;color:var(--fg3);margin-left:3px}
+.sprb{font-size:11px;font-weight:700;padding:2px 6px;border-radius:3px;margin:0 7px;white-space:nowrap}
+.spi{font-size:12px;font-weight:600;color:var(--fg2);min-width:75px;text-align:right}
+.swt{font-size:13px;font-weight:700;color:var(--fg);min-width:75px;text-align:right}
+.ofr{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ofr:last-child{border-bottom:none}
+.ofav{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.ofi{flex:1;min-width:0}
+.ofn{font-size:12px;font-weight:600;color:var(--fg)}
+.ofo{font-size:11px;color:var(--fg3)}
+.ofbw{width:55px;height:3px;background:var(--bg);border-radius:2px;overflow:hidden;margin-top:3px}
+.ofb{height:100%;border-radius:2px;background:var(--sf-blue);transition:width 1.2s cubic-bezier(0.16,1,0.3,1)}
+.ofp{font-size:12px;font-weight:700;color:var(--fg);text-align:right}
+.ofw{font-size:11px;font-weight:600;color:var(--sf-blue);text-align:right}
+.ss{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:12px;overflow:hidden}
+.ssi{padding:11px 14px;border-right:1px solid var(--border);text-align:center}
+.ssi:last-child{border-right:none}
+.ssv{font-size:20px;font-weight:700;color:var(--fg);letter-spacing:-0.02em}
+.ssl{font-size:10px;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:0.08em;margin-top:2px}
+
+/* Login gate */
+#login-gate{position:fixed;inset:0;background:var(--sf-navy);display:flex;align-items:center;justify-content:center;z-index:1000}
+.login-card{background:var(--surface);border-radius:var(--r-lg);padding:34px 36px;text-align:center;max-width:340px;width:90%;box-shadow:0 12px 40px rgba(0,0,0,0.25)}
+.login-card .logo-mark{width:46px;height:46px;margin:0 auto 14px}
+.login-title{font-size:18px;font-weight:700;color:var(--fg);margin-bottom:4px}
+.login-sub{font-size:12px;color:var(--fg3);margin-bottom:22px}
+.login-err{font-size:11px;color:var(--red);margin-top:14px;line-height:1.5}
+
+/* Modals */
+.modal-backdrop{position:fixed;inset:0;background:rgba(3,45,96,0.45);display:flex;align-items:center;justify-content:center;z-index:500;padding:16px}
+.modal{background:var(--surface);border-radius:var(--r-lg);width:440px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,0.25)}
+.modal-hd{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface)}
+.modal-title{font-size:14px;font-weight:700;color:var(--fg)}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--fg3);font-size:18px;line-height:1}
+.modal-body{padding:14px 16px;display:flex;flex-direction:column;gap:11px}
+.modal-foot{padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;font-weight:700;color:var(--fg3);text-transform:uppercase;letter-spacing:0.06em}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* Assistant view */
+.assistant-wrap{max-width:760px;margin:0 auto}
+
+@media(max-width:768px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .kpi-bar{grid-template-columns:repeat(2,1fr)}
+  .kpi:nth-child(2){border-right:none}
+  .kpi:nth-child(3){border-top:1px solid var(--border)}
+  .kpi:nth-child(4){border-top:1px solid var(--border);border-right:none}
+  .search-wrap{max-width:200px;margin:0 12px}
+  .client-chip{display:none}
+  .fcg{grid-template-columns:1fr}
+  .fcc.full{grid-column:1}
+  .cl{grid-template-columns:1fr}
+  .dlp{display:none}
+  .ss{grid-template-columns:repeat(2,1fr)}
+  .ssi:nth-child(2){border-right:none}
+  .ssi:nth-child(3){border-top:1px solid var(--border)}
+  .ssi:nth-child(4){border-top:1px solid var(--border);border-right:none}
+  .sn-right{display:none}
+  .content{padding:12px}
+  .board{grid-template-columns:repeat(5,minmax(165px,1fr));min-width:825px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div id="login-gate">
+  <div class="login-card">
+    <div class="logo-mark"><svg width="22" height="22" viewBox="0 0 40 40" fill="none"><path d="M8 10 L20 4 L32 10 L20 16 Z" fill="#fff" opacity="0.9"/><path d="M20 16 L32 10 L32 24 L20 30 Z" fill="#fff" opacity="0.6"/><path d="M8 10 L20 16 L20 30 L8 24 Z" fill="#fff" opacity="0.75"/></svg></div>
+    <div class="login-title">Simplí Solutions</div>
+    <div class="login-sub">Sign in to your pipeline portal</div>
+    <button class="sf-btn sf-btn-p" id="login-btn" style="width:100%;justify-content:center;" onclick="login()">Log in</button>
+    <div class="login-err hidden" id="login-err"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+
+<nav class="topbar">
+  <a class="logo" href="#">
+    <div class="logo-mark"><svg width="18" height="18" viewBox="0 0 40 40" fill="none"><path d="M8 10 L20 4 L32 10 L20 16 Z" fill="#fff" opacity="0.9"/><path d="M20 16 L32 10 L32 24 L20 30 Z" fill="#fff" opacity="0.6"/><path d="M8 10 L20 16 L20 30 L8 24 Z" fill="#fff" opacity="0.75"/></svg></div>
+    <span class="logo-text">Simplí Solutions</span>
+  </a>
+  <div class="search-wrap">
+    <i class="ti ti-search search-icon" aria-hidden="true"></i>
+    <input class="search-box" id="search-box" type="text" placeholder="Search deals, clients…" />
+  </div>
+  <div class="topbar-right">
+    <span class="client-chip" id="client-chip">…</span>
+    <button class="top-icon" aria-label="Notifications"><i class="ti ti-bell" style="font-size:17px;" aria-hidden="true"></i><div class="notif-dot"></div></button>
+    <div class="top-av" id="top-av" title="Log out" onclick="logout()">…</div>
+  </div>
+</nav>
+
+<nav class="subnav">
+  <a class="sn-item active" onclick="sv('pipeline',this);return false;" href="#"><i class="ti ti-layout-kanban" aria-hidden="true"></i> Pipeline</a>
+  <a class="sn-item" onclick="sv('tasks',this);return false;" href="#"><i class="ti ti-checkbox" aria-hidden="true"></i> Tasks <span class="sn-badge" id="subnav-tasks-badge">0</span></a>
+  <a class="sn-item" onclick="sv('comments',this);return false;" href="#"><i class="ti ti-message-circle" aria-hidden="true"></i> Activity</a>
+  <a class="sn-item" onclick="sv('forecast',this);return false;" href="#"><i class="ti ti-chart-line" aria-hidden="true"></i> Forecast</a>
+  <a class="sn-item" onclick="sv('assistant',this);return false;" href="#"><i class="ti ti-robot" aria-hidden="true"></i> AI Assistant</a>
+  <div class="sn-right">
+    <button class="sf-btn" id="attention-filter-btn" onclick="toggleAttentionFilter()"><i class="ti ti-filter" aria-hidden="true"></i> Needs attention</button>
+    <select class="sf-btn" id="owner-filter" onchange="applyFilters()"><option value="">All owners</option></select>
+    <button class="sf-btn sf-btn-p" onclick="openModal('deal')"><i class="ti ti-plus" aria-hidden="true"></i> New deal</button>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-hd">Navigation</div>
+    <span class="nav-lbl">Views</span>
+    <a class="nav-item active" onclick="sv('pipeline',this);return false;" href="#"><div class="nav-l"><i class="ti ti-layout-kanban" aria-hidden="true"></i> Pipeline</div><span class="nav-ct" id="nav-pipeline-count">0</span></a>
+    <a class="nav-item" onclick="sv('tasks',this);return false;" href="#"><div class="nav-l"><i class="ti ti-checkbox" aria-hidden="true"></i> Tasks</div><span class="nav-ct r" id="nav-tasks-count">0</span></a>
+    <a class="nav-item" onclick="sv('comments',this);return false;" href="#"><div class="nav-l"><i class="ti ti-message-circle" aria-hidden="true"></i> Activity</div></a>
+    <a class="nav-item" onclick="sv('forecast',this);return false;" href="#"><div class="nav-l"><i class="ti ti-chart-line" aria-hidden="true"></i> Forecast</div></a>
+    <a class="nav-item" onclick="sv('assistant',this);return false;" href="#"><div class="nav-l"><i class="ti ti-robot" aria-hidden="true"></i> AI Assistant</div></a>
+    <span class="nav-lbl">Team</span>
+    <div style="padding:6px 0;" id="team-list"></div>
+    <div class="sb-foot">
+      <div class="plan-pill"><div class="pp-lbl">Current plan</div><div class="pp-name" id="plan-name">Growth</div><div class="pp-price" id="plan-price">&#8364;299 / month</div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="kpi-bar">
+      <div class="kpi"><div class="kpi-accent" style="background:var(--sf-blue)"></div><div class="kpi-lbl"><i class="ti ti-currency-euro" style="font-size:12px;" aria-hidden="true"></i> Total pipeline</div><div class="kpi-val" id="kpi-total-pipeline">&#8364;0</div><div class="kpi-d neu" id="kpi-total-count">0 active opportunities</div></div>
+      <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl"><i class="ti ti-target" style="font-size:12px;" aria-hidden="true"></i> Weighted forecast</div><div class="kpi-val" id="kpi-weighted">&#8364;0</div><div class="kpi-d neu">Probability adjusted</div></div>
+      <div class="kpi"><div class="kpi-accent" style="background:var(--amber)"></div><div class="kpi-lbl"><i class="ti ti-clock" style="font-size:12px;" aria-hidden="true"></i> Awaiting PO</div><div class="kpi-val" id="kpi-awaiting-value">&#8364;0</div><div class="kpi-d up" id="kpi-awaiting-meta"><i class="ti ti-check" style="font-size:10px;" aria-hidden="true"></i> 0 deals</div></div>
+      <div class="kpi"><div class="kpi-accent" style="background:var(--red)"></div><div class="kpi-lbl"><i class="ti ti-alert-circle" style="font-size:12px;" aria-hidden="true"></i> Overdue actions</div><div class="kpi-val" id="kpi-overdue" style="color:var(--red);">0</div><div class="kpi-d down"><span onclick="sv('tasks',document.querySelectorAll('.nav-item')[1])" style="cursor:pointer;text-decoration:underline;">View task list</span></div></div>
+    </div>
+
+    <div class="content">
+
+      <!-- PIPELINE -->
+      <div class="view active" id="view-pipeline">
+        <div class="toolbar">
+          <div class="tb-l"><span class="pg-title">Sales pipeline</span><span class="rec-ct" id="pipeline-count">0 records</span></div>
+          <div class="vt"><button class="vt-b active" onclick="setPipelineView('kanban',this)"><i class="ti ti-layout-kanban" aria-hidden="true"></i></button><button class="vt-b" onclick="setPipelineView('list',this)"><i class="ti ti-list" aria-hidden="true"></i></button></div>
+        </div>
+        <div class="board-wrap" id="board-wrap"><div class="board" id="board"></div></div>
+        <div id="pipeline-list" class="hidden">
+          <table class="sf-tbl">
+            <thead><tr><th>Opportunity</th><th>Company</th><th>Stage</th><th style="text-align:right;">Value</th><th style="text-align:right;">Win %</th><th style="text-align:right;">Weighted</th><th>Owner</th><th>Days in stage</th></tr></thead>
+            <tbody id="pipeline-list-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TASKS -->
+      <div class="view" id="view-tasks">
+        <div class="toolbar"><div class="tb-l"><span class="pg-title">Task list</span><span class="rec-ct" id="tasks-count">0 tasks</span></div><button class="sf-btn sf-btn-p" onclick="openModal('task')"><i class="ti ti-plus" aria-hidden="true"></i> New task</button></div>
+        <table class="sf-tbl">
+          <thead><tr><th style="width:28px;"></th><th>Task</th><th>Deal</th><th>Owner</th><th>Priority</th><th>Due</th></tr></thead>
+          <tbody id="tasks-body"></tbody>
+        </table>
+      </div>
+
+      <!-- COMMENTS / ACTIVITY -->
+      <div class="view" id="view-comments">
+        <div class="toolbar" style="margin-bottom:14px;"><span class="pg-title">Deal activity</span></div>
+        <div class="cl">
+          <div class="dlp">
+            <div class="dlp-hd">Active deals</div>
+            <div id="deal-list"></div>
+          </div>
+          <div class="ap">
+            <div class="ap-hd">
+              <div class="ap-n" id="ap-n">Select a deal</div>
+              <div class="ap-m">
+                <span class="ap-s" id="ap-s" style="background:var(--bg);color:var(--fg3);">—</span>
+                <span style="font-size:12px;font-weight:700;color:var(--fg);" id="ap-v">&#8364;0</span>
+                <span style="font-size:12px;color:var(--fg3);">Owner: <strong id="ap-o" style="color:var(--fg);">—</strong></span>
+                <span style="font-size:11px;color:var(--fg3);font-weight:600;" id="ap-a">—</span>
+              </div>
+            </div>
+            <div class="ap-body" id="ap-body">
+              <div style="padding:20px;text-align:center;color:var(--fg3);font-size:12px;">Select a deal on the left to view its activity.</div>
+            </div>
+            <div class="ap-in">
+              <div class="tr">
+                <button class="tb2 active" onclick="setActivityType(this,'Call')">&#128222; Call</button>
+                <button class="tb2" onclick="setActivityType(this,'Email')">&#9993; Email</button>
+                <button class="tb2" onclick="setActivityType(this,'Note')">&#128221; Note</button>
+              </div>
+              <div class="ir">
+                <input class="sfi" id="ai-inp" type="text" placeholder="Log a call, email, or note&#8230;" onkeydown="if(event.key==='Enter')postComment()" />
+                <button class="sf-btn sf-btn-p" onclick="postComment()">Post</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORECAST -->
+      <div class="view" id="view-forecast">
+        <div class="toolbar" style="margin-bottom:12px;"><span class="pg-title">Revenue forecast</span><span class="rec-ct" id="fc-meta">&#8211;</span></div>
+        <div class="ss">
+          <div class="ssi"><div class="ssv" id="fc-total">&#8364;0</div><div class="ssl">Total pipeline</div></div>
+          <div class="ssi"><div class="ssv" id="fc-weighted">&#8364;0</div><div class="ssl">Weighted forecast</div></div>
+          <div class="ssi"><div class="ssv" id="fc-near" style="color:var(--green);">&#8364;0</div><div class="ssl">Near-certain</div></div>
+          <div class="ssi"><div class="ssv" id="fc-overdue" style="color:var(--red);">0</div><div class="ssl">Overdue actions</div></div>
+        </div>
+        <div class="fcg">
+          <div class="fcc full">
+            <div class="fct"><i class="ti ti-calendar" aria-hidden="true"></i> Monthly revenue forecast</div>
+            <table class="mt">
+              <thead><tr><th>Month</th><th>Forecast</th><th style="text-align:right;">Expected</th><th style="text-align:right;">Prob</th></tr></thead>
+              <tbody id="forecast-monthly-body"></tbody>
+            </table>
+          </div>
+          <div class="fcc">
+            <div class="fct"><i class="ti ti-layers" aria-hidden="true"></i> By stage</div>
+            <div id="forecast-stage-rows"></div>
+            <div style="border-top:2px solid var(--border);margin-top:8px;padding-top:9px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;font-weight:700;color:var(--fg);">Total weighted</span><span style="font-size:16px;font-weight:700;color:var(--sf-blue);" id="forecast-total-weighted">&#8364;0</span></div>
+          </div>
+          <div class="fcc">
+            <div class="fct"><i class="ti ti-users" aria-hidden="true"></i> By owner</div>
+            <div id="forecast-owner-rows"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI ASSISTANT -->
+      <div class="view" id="view-assistant">
+        <div class="toolbar" style="margin-bottom:12px;"><div class="tb-l"><span class="pg-title">AI sales assistant</span></div></div>
+        <div class="ap assistant-wrap">
+          <div class="ap-hd">
+            <div class="ap-n">Ask about your pipeline</div>
+            <div style="font-size:11px;color:var(--fg3);">e.g. "Which deals are overdue?", "Summarize this month's forecast", "Create a follow-up task for Bottleworks"</div>
+          </div>
+          <div class="ap-body" id="assistant-body"></div>
+          <div class="ap-in">
+            <div class="ir">
+              <input class="sfi" id="assistant-inp" type="text" placeholder="Ask the assistant…" onkeydown="if(event.key==='Enter')sendAssistantMessage()"/>
+              <button class="sf-btn sf-btn-p" onclick="sendAssistantMessage()">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</div>
+
+<!-- NEW DEAL MODAL -->
+<div class="modal-backdrop hidden" id="deal-modal-backdrop">
+  <div class="modal">
+    <div class="modal-hd"><span class="modal-title">New deal</span><button class="modal-close" onclick="closeModal('deal')">&times;</button></div>
+    <form id="deal-form" class="modal-body" onsubmit="event.preventDefault();submitDealForm();">
+      <div class="field"><label>Opportunity</label><input class="sfi" name="opportunity" required></div>
+      <div class="field"><label>Company</label><input class="sfi" name="company" required></div>
+      <div class="field-row">
+        <div class="field"><label>Stage</label>
+          <select class="sfi" name="stage" required>
+            <option>Awaiting PO</option>
+            <option>Verbal Confirmed</option>
+            <option>Negotiation</option>
+            <option>Survey</option>
+            <option selected>Quote</option>
+          </select>
+        </div>
+        <div class="field"><label>Owner</label><input class="sfi" name="owner"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Value (&#8364;)</label><input class="sfi" type="number" name="value" min="0" step="0.01" required></div>
+        <div class="field"><label>Win probability (%)</label><input class="sfi" type="number" name="win_prob" min="0" max="100" value="20" required></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Next action date</label><input class="sfi" type="date" name="next_action"></div>
+        <div class="field"><label>Close month</label><input class="sfi" type="month" name="close_month"></div>
+      </div>
+      <div class="field"><label>Source</label><input class="sfi" name="source"></div>
+      <div class="field"><label>Notes</label><textarea class="sfi" name="notes"></textarea></div>
+    </form>
+    <div class="modal-foot"><button class="sf-btn" onclick="closeModal('deal')">Cancel</button><button class="sf-btn sf-btn-p" onclick="submitDealForm()">Save deal</button></div>
+  </div>
+</div>
+
+<!-- NEW TASK MODAL -->
+<div class="modal-backdrop hidden" id="task-modal-backdrop">
+  <div class="modal">
+    <div class="modal-hd"><span class="modal-title">New task</span><button class="modal-close" onclick="closeModal('task')">&times;</button></div>
+    <form id="task-form" class="modal-body" onsubmit="event.preventDefault();submitTaskForm();">
+      <div class="field"><label>Title</label><input class="sfi" name="title" required></div>
+      <div class="field"><label>Related deal</label><select class="sfi" name="deal_id"><option value="">(none)</option></select></div>
+      <div class="field-row">
+        <div class="field"><label>Owner</label><input class="sfi" name="owner"></div>
+        <div class="field"><label>Due date</label><input class="sfi" type="date" name="due_date"></div>
+      </div>
+      <div class="field"><label>Priority</label>
+        <select class="sfi" name="priority">
+          <option>Critical</option>
+          <option>High</option>
+          <option selected>Normal</option>
+        </select>
+      </div>
+    </form>
+    <div class="modal-foot"><button class="sf-btn" onclick="closeModal('task')">Cancel</button><button class="sf-btn sf-btn-p" onclick="submitTaskForm()">Save task</button></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
